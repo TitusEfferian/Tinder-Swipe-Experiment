@@ -63,13 +63,28 @@ export default class App extends Component<Props> {
 
   renderView() {
     return colors.map((x, y) => {
-      return (
-        <Animated.View {...this.panResponder.panHandlers} key={x.id} style={[{transform:this.position.getTranslateTransform()},{ position:'absolute',height: SCREEN_HEIGHT - 120, width: SCREEN_WIDTH, padding: 16 }]}>
-          <View style={{ flex: 1, backgroundColor: x.color, borderRadius: 24, width: null, height: null, }}>
+      if(y<this.state.currentIndex){
+        return null
+      }
+      else if (y == this.state.currentIndex) {
+        return (
+          <Animated.View {...this.panResponder.panHandlers} key={x.id} style={[{ transform: this.position.getTranslateTransform() }, { position: 'absolute', height: SCREEN_HEIGHT - 120, width: SCREEN_WIDTH, padding: 16 }]}>
+            <View style={{ flex: 1, backgroundColor: x.color, borderRadius: 24, width: null, height: null, }}>
 
-          </View>
-        </Animated.View>
-      )
+            </View>
+          </Animated.View>
+        )
+      }
+      else{
+        return (
+          <Animated.View key={x.id} style={[{ position:'absolute',height: SCREEN_HEIGHT - 120, width: SCREEN_WIDTH, padding: 16 }]}>
+            <View style={{ flex: 1, backgroundColor: x.color, borderRadius: 24, width: null, height: null, }}>
+  
+            </View>
+          </Animated.View>
+        )
+      }
+      
     }).reverse()
   }
   render() {
