@@ -37,25 +37,43 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export default class App extends Component<Props> {
 
-  constructor(props){
+  constructor(props) {
     super(props)
 
 
     this.position = new Animated.ValueXY()
-    this.state = {
-      currentIndex:0,
-    }
-    this.panResponder = PanResponder.create({
-      onStartShouldSetPanResponder:(event,gestureState)=>true,
 
-      onPanResponderMove:(event,gestureState)=>{
+    this.rotate = this.position.x.interpolate({
+      inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
+      outputRange: ['-10deg', '0deg', '10deg'],
+      extrapolate: 'clamp '
+    })
+
+    this.rotateAndTranslate = {
+      transform: [
+        {
+          rotate: this.rotate
+        }
+        ,
+        ...this.position.getTranslateTransform()
+      ]
+    }
+
+    this.state = {
+      currentIndex: 0,
+    }
+
+    this.panResponder = PanResponder.create({
+      onStartShouldSetPanResponder: (event, gestureState) => true,
+
+      onPanResponderMove: (event, gestureState) => {
         this.position.setValue({
-          x:gestureState.dx,
-          y:gestureState.dy
+          x: gestureState.dx,
+          y: gestureState.dy
         })
       },
 
-      onPanResponderRelease:(event,gestureState)=>{
+      onPanResponderRelease: (event, gestureState) => {
 
       }
     })
@@ -63,28 +81,28 @@ export default class App extends Component<Props> {
 
   renderView() {
     return colors.map((x, y) => {
-      if(y<this.state.currentIndex){
+      if (y < this.state.currentIndex) {
         return null
       }
       else if (y == this.state.currentIndex) {
         return (
-          <Animated.View {...this.panResponder.panHandlers} key={x.id} style={[{ transform: this.position.getTranslateTransform() }, { position: 'absolute', height: SCREEN_HEIGHT - 120, width: SCREEN_WIDTH, padding: 16 }]}>
+          <Animated.View {...this.panResponder.panHandlers} key={x.id} style={[this.rotateAndTranslate, { position: 'absolute', height: SCREEN_HEIGHT - 120, width: SCREEN_WIDTH, padding: 16 }]}>
             <View style={{ flex: 1, backgroundColor: x.color, borderRadius: 24, width: null, height: null, }}>
 
             </View>
           </Animated.View>
         )
       }
-      else{
+      else {
         return (
-          <Animated.View key={x.id} style={[{ position:'absolute',height: SCREEN_HEIGHT - 120, width: SCREEN_WIDTH, padding: 16 }]}>
+          <Animated.View key={x.id} style={[{ position: 'absolute', height: SCREEN_HEIGHT - 120, width: SCREEN_WIDTH, padding: 16 }]}>
             <View style={{ flex: 1, backgroundColor: x.color, borderRadius: 24, width: null, height: null, }}>
-  
+
             </View>
           </Animated.View>
         )
       }
-      
+
     }).reverse()
   }
   render() {
