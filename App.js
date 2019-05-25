@@ -9,14 +9,6 @@
 import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, View, Animated, PanResponder, Dimensions } from 'react-native';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
-
-type Props = {};
 const colors = [
   {
     id: 1,
@@ -40,7 +32,6 @@ export default class App extends Component<Props> {
   constructor(props) {
     super(props)
 
-
     this.position = new Animated.ValueXY()
 
     this.rotate = this.position.x.interpolate({
@@ -48,6 +39,18 @@ export default class App extends Component<Props> {
       outputRange: ['-10deg', '0deg', '10deg'],
       extrapolate: 'clamp '
     })
+
+    this.nextCardOpacity = this.position.x.interpolate({
+      inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
+      outputRange: [1, 0, 1],
+      extrapolate: 'clamp'
+    })
+    this.nextCardScale = this.position.x.interpolate({
+      inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
+      outputRange: [1, 0.8, 1],
+      extrapolate: 'clamp'
+    })
+
 
     this.rotateAndTranslate = {
       transform: [
@@ -74,7 +77,35 @@ export default class App extends Component<Props> {
       },
 
       onPanResponderRelease: (event, gestureState) => {
-
+        if (gestureState.dx > 120) {
+          Animated.timing(this.position, {
+            toValue: { x: SCREEN_WIDTH + 1000, y: gestureState.dy },
+            duration: 500
+          }).start(() => {
+            this.setState({
+              currentIndex: this.state.currentIndex + 1
+            }, () => {
+              this.position.setValue({ x: 0, y: 0 })
+            })
+          })
+        } else if (gestureState.dx < -120) {
+          Animated.timing(this.position, {
+            toValue: { x: -SCREEN_WIDTH - 1000, y: gestureState.dy },
+            duration: 500
+          }).start(() => {
+            this.setState({
+              currentIndex: this.state.currentIndex + 1
+            }, () => {
+              this.position.setValue({ x: 0, y: 0 })
+            })
+          })
+        }
+        else{
+          Animated.timing(this.position,{
+            toValue:{x:0,y:0},
+            duration:500,
+          }).start()
+        }
       }
     })
   }
@@ -95,7 +126,7 @@ export default class App extends Component<Props> {
       }
       else {
         return (
-          <Animated.View key={x.id} style={[{ position: 'absolute', height: SCREEN_HEIGHT - 120, width: SCREEN_WIDTH, padding: 16 }]}>
+          <Animated.View key={x.id} style={[{ opacity: this.nextCardOpacity, transform: [{ scale: this.nextCardScale }] }, { position: 'absolute', height: SCREEN_HEIGHT - 120, width: SCREEN_WIDTH, padding: 16 }]}>
             <View style={{ flex: 1, backgroundColor: x.color, borderRadius: 24, width: null, height: null, }}>
 
             </View>
@@ -105,6 +136,7 @@ export default class App extends Component<Props> {
 
     }).reverse()
   }
+
   render() {
     return (
       <View style={{ flex: 1 }}>
@@ -121,22 +153,3 @@ export default class App extends Component<Props> {
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-});
